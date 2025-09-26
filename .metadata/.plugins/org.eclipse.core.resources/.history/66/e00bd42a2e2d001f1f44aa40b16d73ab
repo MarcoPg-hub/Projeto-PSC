@@ -1,0 +1,766 @@
+package controller;
+
+import java.awt.GridLayout;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import connection.ConexaoMySQL;
+import model.cadastroMedico;
+import model.cadastroPaciente;
+
+public class ControlaCadastro {
+	
+	public String getEmailRecuperacao(String nomeUsuario) {
+        String url = "jdbc:mysql://localhost:3306/nome_do_seu_banco";
+        String user = ""; 
+        String password = ""; 
+        
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+            String sql = "SELECT email_recuperacao FROM usuarios WHERE nome_usuario = ?";
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, nomeUsuario);
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("email_recuperacao");
+                    } else {
+                        return null; 
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null; 
+        }
+    }
+    
+    public void adicionarcadastroPaciente(cadastroPaciente cad) {
+        Connection conn = ConexaoMySQL.getInstance();
+        try {
+            String sql = "INSERT INTO pacientes (nomePaciente, enderecoPaciente, cpf, profissao, nascimento, sexo, telefonePaciente, celular, emailPaciente) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, cad.getNomePaciente());
+            stmt.setString(2, cad.getEnderecoPaciente());
+            stmt.setString(3, cad.getCpf());
+            stmt.setString(4, cad.getProfissao());
+            stmt.setString(5, cad.getNascimento());
+            stmt.setString(6, cad.getSexo());
+            stmt.setString(7, cad.getTelefonePaciente());
+            stmt.setString(8, cad.getCelular());
+            stmt.setString(9, cad.getEmailPaciente());
+            stmt.execute();
+            conn.close();
+            JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso!","Eba!!! Cliente a bordo...", JOptionPane.PLAIN_MESSAGE);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void adicionarcadastroMedico(cadastroMedico cad) {
+        Connection conn = ConexaoMySQL.getInstance();
+        try {
+            String sql = "INSERT INTO medico (nome, crm, telefone, endereco, especializacao, disponibilidade, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, cad.getNOME());
+            stmt.setString(2, cad.getCRM());
+            stmt.setString(3, cad.getTELEFONE());
+            stmt.setString(4, cad.getENDERECO());
+            stmt.setString(5, cad.getESPECIALIZACAO());
+            stmt.setString(6, cad.getDISPONIBILIDADE());
+            stmt.setString(7, cad.getEmail());
+            stmt.execute();
+            conn.close();
+            JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso!", "Eba!!! Mais um profissional chegando...", JOptionPane.PLAIN_MESSAGE);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public String atualizarCadastroPaciente(cadastroPaciente paciente) {
+
+        JPanel panel = new JPanel(new GridLayout(0, 2));
+
+        JTextField nomeField = new JTextField(paciente.getNomePaciente(), 20);
+        JTextField enderecoField = new JTextField(paciente.getEnderecoPaciente(), 20);
+        JTextField cpfField = new JTextField(paciente.getCpf(), 20);
+        JTextField profissaoField = new JTextField(paciente.getProfissao(), 20);
+        JTextField nascimentoField = new JTextField(paciente.getNascimento(), 20);
+        JTextField sexoField = new JTextField(paciente.getSexo(), 20);
+        JTextField telefoneField = new JTextField(paciente.getTelefonePaciente(), 20);
+        JTextField celularField = new JTextField(paciente.getCelular(), 20);
+        JTextField emailField = new JTextField(paciente.getEmailPaciente(), 20);
+
+        panel.add(new JLabel("Nome:"));
+        panel.add(nomeField);
+        panel.add(new JLabel("Endereço:"));
+        panel.add(enderecoField);
+        panel.add(new JLabel("CPF:"));
+        panel.add(cpfField);
+        panel.add(new JLabel("Profissão:"));
+        panel.add(profissaoField);
+        panel.add(new JLabel("Nascimento:"));
+        panel.add(nascimentoField);
+        panel.add(new JLabel("Sexo:"));
+        panel.add(sexoField);
+        panel.add(new JLabel("Telefone:"));
+        panel.add(telefoneField);
+        panel.add(new JLabel("Celular:"));
+        panel.add(celularField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Atualizar Cadastro de Paciente", 
+        		JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String campoAlterado = "";
+
+            if (!nomeField.getText().equals(paciente.getNomePaciente())) {
+                paciente.setNomePaciente(nomeField.getText());
+                campoAlterado = "Nome";
+            } else if (!enderecoField.getText().equals(paciente.getEnderecoPaciente())) {
+                paciente.setEnderecoPaciente(enderecoField.getText());
+                campoAlterado = "Endereço";
+            } else if (!cpfField.getText().equals(paciente.getCpf())) {
+                paciente.setCpf(cpfField.getText());
+                campoAlterado = "CPF";
+            } else if (!profissaoField.getText().equals(paciente.getProfissao())) {
+                paciente.setProfissao(profissaoField.getText());
+                campoAlterado = "Profissão";
+            } else if (!nascimentoField.getText().equals(paciente.getNascimento())) {
+                paciente.setNascimento(nascimentoField.getText());
+                campoAlterado = "Nascimento";
+            } else if (!sexoField.getText().equals(paciente.getSexo())) {
+                paciente.setSexo(sexoField.getText());
+                campoAlterado = "Sexo";
+            } else if (!telefoneField.getText().equals(paciente.getTelefonePaciente())) {
+                paciente.setTelefonePaciente(telefoneField.getText());
+                campoAlterado = "Telefone";
+            } else if (!celularField.getText().equals(paciente.getCelular())) {
+                paciente.setCelular(celularField.getText());
+                campoAlterado = "Celular";
+            } else if (!emailField.getText().equals(paciente.getEmailPaciente())) {
+                paciente.setEmailPaciente(emailField.getText());
+                campoAlterado = "Email";
+            }
+
+            try {
+                Connection conn = ConexaoMySQL.getInstance();
+                String sql = "UPDATE pacientes SET nomePaciente = ?, enderecoPaciente = ?, cpf = ?, profissao = ?, "
+                		+ "nascimento = ?, sexo = ?, telefonePaciente = ?, celular = ?, emailPaciente = ? WHERE id = ?";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, paciente.getNomePaciente());
+                stmt.setString(2, paciente.getEnderecoPaciente());
+                stmt.setString(3, paciente.getCpf());
+                stmt.setString(4, paciente.getProfissao());
+                stmt.setString(5, paciente.getNascimento());
+                stmt.setString(6, paciente.getSexo());
+                stmt.setString(7, paciente.getTelefonePaciente());
+                stmt.setString(8, paciente.getCelular());
+                stmt.setString(9, paciente.getEmailPaciente());
+                stmt.setInt(10, paciente.getId());
+                stmt.executeUpdate();
+                conn.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            return campoAlterado;
+        }
+
+        return null;
+    }
+
+    private String atualizarCadastroMedico(cadastroMedico medico) {
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+
+        JTextField nomeField = new JTextField(medico.getNOME(), 20);
+        JTextField crmField = new JTextField(medico.getCRM(), 20);
+        JTextField telefoneField = new JTextField(medico.getTELEFONE(), 20);
+        JTextField enderecoField = new JTextField(medico.getENDERECO(), 20);
+        JTextField especializacaoField = new JTextField(medico.getESPECIALIZACAO(), 20);
+        JTextField disponibilidadeField = new JTextField(medico.getDISPONIBILIDADE(), 20);
+        JTextField emailField = new JTextField(medico.getEmail(), 20);
+
+        panel.add(new JLabel("Nome:"));
+        panel.add(nomeField);
+        panel.add(new JLabel("CRM:"));
+        panel.add(crmField);
+        panel.add(new JLabel("Telefone:"));
+        panel.add(telefoneField);
+        panel.add(new JLabel("Endereço:"));
+        panel.add(enderecoField);
+        panel.add(new JLabel("Especialização:"));
+        panel.add(especializacaoField);
+        panel.add(new JLabel("Disponibilidade:"));
+        panel.add(disponibilidadeField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Atualizar Cadastro de Médico", 
+        		JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String campoAlterado = "";
+
+            if (!nomeField.getText().equals(medico.getNOME())) {
+                medico.setNOME(nomeField.getText());
+                campoAlterado = "Nome";
+            } else if (!crmField.getText().equals(medico.getCRM())) {
+                medico.setCRM(crmField.getText());
+                campoAlterado = "CRM";
+            } else if (!telefoneField.getText().equals(medico.getTELEFONE())) {
+                medico.setTELEFONE(telefoneField.getText());
+                campoAlterado = "Telefone";
+            } else if (!enderecoField.getText().equals(medico.getENDERECO())) {
+                medico.setENDERECO(enderecoField.getText());
+                campoAlterado = "Endereço";
+            } else if (!especializacaoField.getText().equals(medico.getESPECIALIZACAO())) {
+                medico.setESPECIALIZACAO(especializacaoField.getText());
+                campoAlterado = "Especialização";
+            } else if (!disponibilidadeField.getText().equals(medico.getDISPONIBILIDADE())) {
+                medico.setDISPONIBILIDADE(disponibilidadeField.getText());
+                campoAlterado = "Disponibilidade";
+            } else if (!emailField.getText().equals(medico.getEmail())) {
+                medico.setEmail(emailField.getText());
+                campoAlterado = "Email";
+            }
+
+            try {
+                Connection conn = ConexaoMySQL.getInstance();
+                String sql = "UPDATE medico SET nome = ?, crm = ?, telefone = ?, endereco = ?, especializacao = ?, "
+                		+ "disponibilidade = ?, email = ? WHERE id_medico = ?";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, medico.getNOME());
+                stmt.setString(2, medico.getCRM());
+                stmt.setString(3, medico.getTELEFONE());
+                stmt.setString(4, medico.getENDERECO());
+                stmt.setString(5, medico.getESPECIALIZACAO());
+                stmt.setString(6, medico.getDISPONIBILIDADE());
+                stmt.setString(7, medico.getEmail());
+                stmt.setInt(8, medico.getId_medico());
+                stmt.executeUpdate();
+                conn.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (!campoAlterado.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Campo '" + campoAlterado + "'  alterado com sucesso." , 
+                		"Alteração :" , JOptionPane.PLAIN_MESSAGE);
+            }
+
+            return campoAlterado;
+        }
+
+        return null;
+    }
+    public void atualizarcadastroPacienteTotal(cadastroPaciente cad) {
+        Connection conn = ConexaoMySQL.getInstance();
+        try {        	
+            String sql = "UPDATE pacientes SET nomePaciente = ?, enderecoPaciente = ?, cpf = ?, profissao = ?, "
+            		+ "nascimento = ?, sexo = ?, telefonePaciente = ?, celular = ?, emailPaciente = ? WHERE id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, cad.getNomePaciente());
+            stmt.setString(2, cad.getEnderecoPaciente());
+            stmt.setString(3, cad.getCpf());
+            stmt.setString(4, cad.getProfissao());
+            stmt.setString(5, cad.getNascimento());
+            stmt.setString(6, cad.getSexo());
+            stmt.setString(7, cad.getTelefonePaciente());
+            stmt.setString(8, cad.getCelular());
+            stmt.setString(9, cad.getEmailPaciente());
+            stmt.setInt(10, cad.getId());
+            stmt.execute();
+            conn.close();
+            JOptionPane.showMessageDialog(null, "Cadastro do paciente atualizado com sucesso!");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void atualizarcadastroMedicoTotal(cadastroMedico cad) {
+        Connection conn = ConexaoMySQL.getInstance();
+        try {
+            String sql = "UPDATE medico SET nome = ?, crm = ?, telefone = ?, endereco = ?, especializacao = ?, "
+            		+ "disponibilidade = ?, email = ? WHERE id_medico = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, cad.getNOME());
+            stmt.setString(2, cad.getCRM());
+            stmt.setString(3, cad.getTELEFONE());
+            stmt.setString(4, cad.getENDERECO());
+            stmt.setString(5, cad.getESPECIALIZACAO());
+            stmt.setString(6, cad.getDISPONIBILIDADE());
+            stmt.setString(7, cad.getEmail());
+            stmt.setInt(8, cad.getId_medico());
+            stmt.execute();
+            conn.close();
+            JOptionPane.showMessageDialog(null, "Cadastro do médico atualizado com sucesso!");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void buscarAtualizarPaciente(String busca) {
+        Connection conn = ConexaoMySQL.getInstance();
+        String colunaBusca = busca.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}") ? "cpf" : "nomePaciente";
+        String sql = "SELECT * FROM pacientes WHERE " + colunaBusca + " LIKE ?";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + busca + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            List<cadastroPaciente> pacientes = new ArrayList<>();
+            while (rs.next()) {
+                cadastroPaciente paciente = new cadastroPaciente(
+                    rs.getString("nomePaciente"),
+                    rs.getString("enderecoPaciente"),
+                    rs.getString("cpf"),
+                    rs.getString("profissao"),
+                    rs.getString("nascimento"),
+                    rs.getString("sexo"),
+                    rs.getString("telefonePaciente"),
+                    rs.getString("celular"),
+                    rs.getString("emailPaciente"));
+                paciente.setId(rs.getInt("id"));
+                pacientes.add(paciente);
+            }
+
+            if (pacientes.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Nenhum paciente encontrado.", "Atenção", JOptionPane.PLAIN_MESSAGE);
+            } else if (pacientes.size() == 1) {
+                String campoAlterado = atualizarCadastroPaciente(pacientes.get(0));
+                if (campoAlterado != null && !campoAlterado.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Campo '" + campoAlterado + "' alterado com sucesso." , 
+                    		"Alteração :" , JOptionPane.PLAIN_MESSAGE);
+                }
+            } else {           	 
+                StringBuilder listaPacientes = new StringBuilder();
+                for (cadastroPaciente paciente : pacientes) {
+                    listaPacientes.append("ID: ").append(paciente.getId()).append(", Nome: ").append(paciente.getNomePaciente()).append("\n");
+                }
+
+                try {
+                	int idEscolhido = Integer.parseInt(JOptionPane.showInputDialog(null, listaPacientes.toString(), 
+                			"Escolha o paciente pelo ID:", JOptionPane.PLAIN_MESSAGE));
+                    cadastroPaciente pacienteSelecionado = null;
+                    for (cadastroPaciente paciente : pacientes) {
+                        if (paciente.getId() == idEscolhido) {
+                            pacienteSelecionado = paciente;
+                            break;
+                        }
+                    }
+
+                    if (pacienteSelecionado != null) {
+                        String campoAlterado = atualizarCadastroPaciente(pacienteSelecionado);
+                        if (campoAlterado != null && !campoAlterado.isEmpty()) {
+                            JOptionPane.showMessageDialog(null, "Campo '" + campoAlterado + "' alterado com sucesso.",
+                            		"Alteração :" , JOptionPane.PLAIN_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "ID inválido. Atualização cancelada.");
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Entrada inválida. Por favor, insira um número válido.");
+                }
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String buscarAtualizarMedico(String busca) {
+        Connection conn = ConexaoMySQL.getInstance();
+        String colunaBusca = busca.matches("\\d+") ? "crm" : "nome";
+        String sql = "SELECT * FROM medico WHERE " + colunaBusca + " LIKE ?";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + busca + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            List<cadastroMedico> medicos = new ArrayList<>();
+            while (rs.next()) {
+                cadastroMedico medico = new cadastroMedico(
+                    rs.getString("nome"),
+                    rs.getString("crm"),
+                    rs.getString("telefone"),
+                    rs.getString("endereco"),
+                    rs.getString("especializacao"),
+                    rs.getString("disponibilidade"),
+                    rs.getString("email")
+                );
+                medico.setId_medico(rs.getInt("id_medico"));
+                medicos.add(medico);
+            }
+
+            if (medicos.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Nenhum médico encontrado.","Atenção", JOptionPane.PLAIN_MESSAGE);
+            } else if (medicos.size() == 1) {
+                return atualizarCadastroMedico(medicos.get(0));
+            } else {
+                StringBuilder listaMedicos = new StringBuilder();
+                for (cadastroMedico medico : medicos) {
+                    listaMedicos.append("ID: ").append(medico.getId_medico()).append(", Nome: ").append(medico.getNOME()).append("\n");
+                }
+
+                int idEscolhido = Integer.parseInt(JOptionPane.showInputDialog(null , listaMedicos.toString() , 
+                		"Escolha o Médico pelo ID:", JOptionPane.PLAIN_MESSAGE));
+                cadastroMedico medicoSelecionado = null;
+                for (cadastroMedico medico : medicos) {
+                    if (medico.getId_medico() == idEscolhido) {
+                        medicoSelecionado = medico;
+                        break;
+                    }
+                }
+
+                if (medicoSelecionado != null) {
+                    return atualizarCadastroMedico(medicoSelecionado);
+                } else {
+                    JOptionPane.showMessageDialog(null, "ID inválido. Atualização cancelada.");
+                }
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
+    }
+   
+    public void removerRegistro(String tipo) {
+        Connection conn = ConexaoMySQL.getInstance();
+        String busca;
+        String colunaBusca;
+
+        if (tipo.equals("paciente")) {
+            busca = JOptionPane.showInputDialog(null , "Digite o CPF ou nome do paciente para buscar:" , "Paciente : " , JOptionPane.PLAIN_MESSAGE);
+            colunaBusca = busca.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}") ? "cpf" : "nomePaciente";
+        } else if (tipo.equals("medico")) {
+            busca = JOptionPane.showInputDialog(null , "Digite o CRM ou nome do médico para buscar:" , "Médico : " , JOptionPane.PLAIN_MESSAGE);
+            colunaBusca = busca.matches("\\d+") ? "crm" : "nome";
+        } else {
+            JOptionPane.showMessageDialog(null, "Tipo de cadastro inválido");
+            return;
+        }
+
+        try {
+            String tabela = tipo.equals("paciente") ? "pacientes" : "medico";
+            String colunaId = tipo.equals("paciente") ? "id" : "id_medico"; 
+            String nomeColuna = tipo.equals("paciente") ? "nomePaciente" : "nome"; 
+            String sql = "SELECT " + colunaId + ", " + nomeColuna + " FROM " + tabela + " WHERE " + colunaBusca + " LIKE ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + busca + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            StringBuilder registros = new StringBuilder();
+            while (rs.next()) {
+                registros.append("ID: ").append(rs.getInt(colunaId)).append(", Nome: ").append(rs.getString(nomeColuna)).append("\n");
+            }
+
+            if (registros.length() > 0) {
+                JOptionPane.showMessageDialog(null, registros.toString() , " Escolha o ID para remoção : " , JOptionPane.PLAIN_MESSAGE);
+                int id = Integer.parseInt(JOptionPane.showInputDialog(null , "Digite o ID do registro que deseja remover:" ,
+                		"Tem certeza que deseja remover ?" , JOptionPane.PLAIN_MESSAGE ));
+                sql = "DELETE FROM " + tabela + " WHERE " + colunaId + " = ?";
+                stmt = conn.prepareStatement(sql);
+                stmt.setInt(1, id);
+                stmt.execute();
+                JOptionPane.showMessageDialog(null, "Registro removido com sucesso!" , "Tchau..." , JOptionPane.PLAIN_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Nenhum registro encontrado.");
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    
+    public void buscarAlterarCelularPaciente(String busca) {
+        Connection conn = ConexaoMySQL.getInstance();
+        String sql = "SELECT * FROM pacientes WHERE nomePaciente LIKE ?";
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + busca + "%");
+            ResultSet rs = stmt.executeQuery();
+            List<cadastroPaciente> pacientes = new ArrayList<>();
+            while (rs.next()) {
+                cadastroPaciente paciente = new cadastroPaciente(
+                    rs.getString("nomePaciente"),
+                    rs.getString("enderecoPaciente"),
+                    rs.getString("cpf"),
+                    rs.getString("profissao"),
+                    rs.getString("nascimento"),
+                    rs.getString("sexo"),
+                    rs.getString("telefonePaciente"),
+                    rs.getString("celular"),
+                    rs.getString("emailPaciente"));
+                paciente.setId(rs.getInt("id"));
+                pacientes.add(paciente);
+            }
+            if (!pacientes.isEmpty()) {
+                StringBuilder listaPacientes = new StringBuilder("Pacientes encontrados por parte do nome '" + busca + "':\n");
+                for (cadastroPaciente paciente : pacientes) {
+                    listaPacientes.append("ID: ").append(paciente.getId()).append(", Nome: ").append(paciente.getNomePaciente()).append("\n");
+                }
+                int idEscolhido = Integer.parseInt(JOptionPane.showInputDialog(null ,listaPacientes.toString() + 
+                		"\nDigite o ID do paciente para alterar o celular:" , "Busca encontrada : " , JOptionPane.PLAIN_MESSAGE));
+                for (cadastroPaciente paciente : pacientes) {
+                    if (paciente.getId() == idEscolhido) {
+                        String novoCelular = JOptionPane.showInputDialog("Digite o novo celular:");
+                        String updateSql = "UPDATE pacientes SET celular = ? WHERE id = ?";
+                        PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                        updateStmt.setString(1, novoCelular);
+                        updateStmt.setInt(2, idEscolhido);
+                        updateStmt.executeUpdate();
+                        JOptionPane.showMessageDialog(null, "Celular atualizado com sucesso para o paciente: " + paciente.getNomePaciente());
+                        break;
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Paciente não encontrado.");
+            }
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void buscarAlterarCelularMedico(String busca) {
+        Connection conn = ConexaoMySQL.getInstance();
+        String sql = "SELECT * FROM medico WHERE nome LIKE ?";
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + busca + "%");
+            ResultSet rs = stmt.executeQuery();
+            List<cadastroMedico> medicos = new ArrayList<>();
+            while (rs.next()) {
+                cadastroMedico medico = new cadastroMedico(
+                    rs.getString("nome"),
+                    rs.getString("crm"),
+                    rs.getString("telefone"),
+                    rs.getString("endereco"),
+                    rs.getString("especializacao"),
+                    rs.getString("disponibilidade"),
+                    rs.getString("email")
+                );
+                medico.setId_medico(rs.getInt("id_medico"));
+                medicos.add(medico);
+            }
+            if (!medicos.isEmpty()) {
+                StringBuilder listaMedicos = new StringBuilder("Médicos encontrados por parte do nome '" + busca + "':\n");
+                for (cadastroMedico medico : medicos) {
+                    listaMedicos.append("ID: ").append(medico.getId_medico()).append(", Nome: ").append(medico.getNOME()).append("\n");
+                }
+                int idEscolhido = Integer.parseInt(JOptionPane.showInputDialog(null , listaMedicos.toString() + 
+                		"\nDigite o ID do médico para alterar o celular:" , "Busca encontrada :" , JOptionPane.PLAIN_MESSAGE));
+                for (cadastroMedico medico : medicos) {
+                    if (medico.getId_medico() == idEscolhido) {
+                        String novoCelular = JOptionPane.showInputDialog("Digite o novo celular:");
+                        String updateSql = "UPDATE medico SET telefone = ? WHERE id_medico = ?";
+                        PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                        updateStmt.setString(1, novoCelular);
+                        updateStmt.setInt(2, idEscolhido);
+                        updateStmt.executeUpdate();
+                        JOptionPane.showMessageDialog(null, "Celular atualizado com sucesso para o médico: " + medico.getNOME());
+                        break;
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Médico não encontrado.");
+            }
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void listarPacientesPorOrdemAlfabetica() {
+        Connection conn = ConexaoMySQL.getInstance();
+        List<cadastroPaciente> pacientes = new ArrayList<>();
+        try {
+            String sql = "SELECT * FROM pacientes ORDER BY nomePaciente ASC";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                cadastroPaciente paciente = new cadastroPaciente(
+                    rs.getString("nomePaciente"),
+                    rs.getString("enderecoPaciente"),
+                    rs.getString("cpf"),
+                    rs.getString("profissao"),
+                    rs.getString("nascimento"),
+                    rs.getString("sexo"),
+                    rs.getString("telefonePaciente"),
+                    rs.getString("celular"),
+                    rs.getString("emailPaciente")
+                );
+                paciente.setId(rs.getInt("id"));
+                pacientes.add(paciente);
+            }
+            conn.close();
+            exibirListaPacientes(pacientes);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void exibirListaPacientes(List<cadastroPaciente> pacientes) {
+        StringBuilder lista = new StringBuilder();     
+        for (cadastroPaciente paciente : pacientes) {        	
+            lista.append("Nome: ").append(paciente.getNomePaciente()).append(", CPF: ").append(paciente.getCpf()).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, lista.toString(), "Lista de Pacientes em ordem alfabética", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public void listarMedicosPorOrdemAlfabetica() {
+        Connection conn = ConexaoMySQL.getInstance();
+        List<cadastroMedico> medicos = new ArrayList<>();
+        try {
+            String sql = "SELECT * FROM medico ORDER BY nome ASC";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                cadastroMedico medico = new cadastroMedico(
+                    rs.getString("nome"),
+                    rs.getString("crm"),
+                    rs.getString("telefone"),
+                    rs.getString("endereco"),
+                    rs.getString("especializacao"),
+                    rs.getString("disponibilidade"),
+                    rs.getString("email")
+                );
+                medico.setId_medico(rs.getInt("id_medico"));
+                medicos.add(medico);
+            }
+            conn.close();
+            exibirListaMedicos(medicos);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void exibirListaMedicos(List<cadastroMedico> medicos) {
+        StringBuilder lista = new StringBuilder();
+        for (cadastroMedico medico : medicos) {
+            lista.append("Nome: ").append(medico.getNOME()).append(", CRM: ").append(medico.getCRM()).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, lista.toString(), "Lista de médicos por ordem alfabética:", JOptionPane.PLAIN_MESSAGE);
+    }
+    public void buscarPorParteNomePaciente(String parteNome) {
+        Connection conn = ConexaoMySQL.getInstance();
+        try {
+            String sql = "SELECT * FROM pacientes WHERE nomePaciente LIKE ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + parteNome + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            List<cadastroPaciente> pacientes = new ArrayList<>();
+            while (rs.next()) {
+                cadastroPaciente paciente = new cadastroPaciente(
+                    rs.getString("nomePaciente"),
+                    rs.getString("enderecoPaciente"),
+                    rs.getString("cpf"),
+                    rs.getString("profissao"),
+                    rs.getString("nascimento"),
+                    rs.getString("sexo"),
+                    rs.getString("telefonePaciente"),
+                    rs.getString("celular"),
+                    rs.getString("emailPaciente"));
+                paciente.setId(rs.getInt("id"));
+                pacientes.add(paciente);
+            }
+
+            if (pacientes.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Nenhum paciente encontrado." , "Ops!!!" , JOptionPane.PLAIN_MESSAGE);
+            } else {
+            	StringBuilder listaPacientes = new StringBuilder();
+                for (cadastroPaciente paciente : pacientes) {
+                    listaPacientes.append("ID: ").append(paciente.getId()).append(", Nome: ").append(paciente.getNomePaciente()).append("\n");
+                }
+                JOptionPane.showMessageDialog(null, listaPacientes.toString(), "Pacientes encontrados : ", JOptionPane.PLAIN_MESSAGE);
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void buscarPorParteNomeMedico(String parteNome) {
+        Connection conn = ConexaoMySQL.getInstance();
+        try {
+            String sql = "SELECT * FROM medico WHERE nome LIKE ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + parteNome + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            List<cadastroMedico> medicos = new ArrayList<>();
+            while (rs.next()) {
+                cadastroMedico medico = new cadastroMedico(
+                    rs.getString("nome"),
+                    rs.getString("crm"),
+                    rs.getString("telefone"),
+                    rs.getString("endereco"),
+                    rs.getString("especializacao"),
+                    rs.getString("disponibilidade"),
+                    rs.getString("email"));
+                medico.setId_medico(rs.getInt("id_medico"));
+                medicos.add(medico);
+            }
+
+            if (medicos.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Nenhum médico encontrado." , "Ops!!!" , JOptionPane.PLAIN_MESSAGE);
+            } else {
+                StringBuilder listaMedicos = new StringBuilder();
+                for (cadastroMedico medico : medicos) {
+                    listaMedicos.append("ID: ").append(medico.getId_medico()).append(", Nome: ").append(medico.getNOME()).append("\n");
+                }
+                JOptionPane.showMessageDialog(null, listaMedicos.toString() , "Médicos encontrados : ", JOptionPane.PLAIN_MESSAGE);
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public List<cadastroPaciente> buscarPorParteEnderecoPaciente(String parteEndereco) {
+        Connection conn = ConexaoMySQL.getInstance();
+        List<cadastroPaciente> listaPacientes = new ArrayList<>();
+
+        try {
+            String sql = "SELECT * FROM pacientes WHERE enderecoPaciente LIKE ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + parteEndereco + "%");
+
+            ResultSet resultados = stmt.executeQuery();
+            while (resultados.next()) {
+                cadastroPaciente paciente = new cadastroPaciente(resultados.getString("nomePaciente"),
+                        resultados.getString("enderecoPaciente"), resultados.getString("cpf"),
+                        resultados.getString("profissao"), resultados.getString("nascimento"),
+                        resultados.getString("sexo"), resultados.getString("telefonePaciente"),
+                        resultados.getString("celular"), resultados.getString("emailPaciente"));
+                paciente.setId(resultados.getInt("id"));
+                listaPacientes.add(paciente);
+            }
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return listaPacientes;
+    }
+}

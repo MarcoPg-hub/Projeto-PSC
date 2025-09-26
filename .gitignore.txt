@@ -1,0 +1,18 @@
+# Ignorar configurações e metadados do Eclipse
+.metadata/
+.settings/
+.classpath
+.project
+
+# Ignorar diretórios de compilação
+bin/
+build/
+target/
+out/
+
+# Arquivos temporários do sistema
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
